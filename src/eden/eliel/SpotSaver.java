@@ -23,44 +23,51 @@ public class SpotSaver {
         System.setProperty(CHROME_DRIVE_PACKAGE, "C://chromedriver.exe");
     }
 
-    public void Execute(String url, String [] seats) throws InterruptedException {
-        String ticketUrl;
+    public void Execute(String url, String [] seats) {
+        try {
+            String ticketUrl;
 
-        _webDriver = new ChromeDriver();
-        _js = (JavascriptExecutor) _webDriver;
-        _webDriver.manage().window().maximize();
+            _webDriver = new ChromeDriver();
+            _js = (JavascriptExecutor) _webDriver;
+            _webDriver.manage().window().maximize();
 
-        _webDriver.get(url);
-        System.out.println(_js.executeScript("return document.readyState"));
-        Thread.sleep(2000);
-        removeSnatch();
-        ticketUrl = _webDriver.findElement(By.id("tix")).getAttribute("src");
+            ticketUrl = getTicketsWeb(url);
 
-        while (true) {
-            boolean needRefresh = true;
-            _webDriver.get(ticketUrl);
-            Thread.sleep(2000);
+            while (true) {
+                boolean needRefresh = true;
 
-            _js.executeScript("document.getElementsByClassName('ddlTicketQuantity')[0].value = '" + seats.length + "'");
-            _webDriver.findElement(By.id("ctl00_CPH1_lbNext1")).click();
-
-            while (needRefresh) {
+                _webDriver.get(ticketUrl);
                 Thread.sleep(2000);
-                if (!_webDriver.findElement(By.id("seatsCounterDisplay")).getText().equals("" + seats.length))
-                    selectSeats(seats);
-                if (!_webDriver.findElement(By.id("seatsCounterDisplay")).getText().equals("0"))
-                    needRefresh = false;
-                else
-                    _webDriver.navigate().refresh();
+
+                while (needRefresh) {
+                    _js.executeScript("document.getElementsByClassName('ddlTicketQuantity')[0].value = '" + seats.length + "'");
+                    _webDriver.findElement(By.id("ctl00_CPH1_lbNext1")).click();
+                    Thread.sleep(2000);
+                    if (!_webDriver.findElement(By.id("seatsCounterDisplay")).getText().equals("" + seats.length))
+                        selectSeats(seats);
+                    if (!_webDriver.findElement(By.id("seatsCounterDisplay")).getText().equals("0"))
+                        needRefresh = false;
+                    else
+                        _webDriver.get(ticketUrl);
+                }
+                printTakenTime();
+
+                _webDriver.findElement(By.id("ctl00_CPH1_SPC_imgSubmit2")).click();
+
+                Thread.sleep(SEAT_DURATION * 60000);
             }
-            printTakenTime();
-
-            _webDriver.findElement(By.id("ctl00_CPH1_SPC_imgSubmit2")).click();
-
-            Thread.sleep(SEAT_DURATION * 60000);
+        }
+        catch (InterruptedException e) {
+            e.printStackTrace();
         }
     }
 
+    private String getTicketsWeb(String url) throws InterruptedException {
+        _webDriver.get(url);
+        Thread.sleep(2000);
+        removeSnatch();
+        return _webDriver.findElement(By.id("tix")).getAttribute("src");
+    }
     private void selectSeats(String [] seats){
         for (String seat : seats){
             _webDriver.findElement(By.id(seat)).click();
