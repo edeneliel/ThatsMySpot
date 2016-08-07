@@ -18,7 +18,7 @@ public class SeatInput extends JPanel{
 
         _seatId = seatNum;
         _seatTag = new JLabel("Seat " + _seatId + ": ");
-        _seatInput = new JTextField(5);
+        _seatInput = new JTextField(6);
         _cancelBtn = new JButton("X");
 
         add(_seatTag);
