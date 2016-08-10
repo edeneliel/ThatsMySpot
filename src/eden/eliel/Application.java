@@ -2,7 +2,6 @@ package eden.eliel;
 
 import javax.swing.*;
 import java.awt.*;
-import java.util.ArrayList;
 
 /**
  * Created by Eden on 8/7/2016.
@@ -10,12 +9,11 @@ import java.util.ArrayList;
 public class Application extends JFrame {
     private SpotSaver _spotSaver;
     private JPanel _inputPanel;
-    private JPanel _seatsPanel;
     private JPanel _btnPanel;
     private JButton _activateBtn;
-    private JButton _addSeatBtn;
+    private JButton _selectSeatsBtn;
     private JTextField _inputUrl;
-    private ArrayList<SeatInput> _seats;
+    private String[] _selectedSeatsIds;
 
     public Application(){
         setLayout(new BoxLayout(getContentPane(),BoxLayout.LINE_AXIS));
@@ -36,6 +34,10 @@ public class Application extends JFrame {
         pack();
     }
 
+    public void setSelectedSeats(String[] seats){
+        _selectedSeatsIds = seats;
+    }
+
     private void setButtonPanel(){
         _btnPanel = new JPanel();
         _btnPanel.setLayout(new BoxLayout(_btnPanel,BoxLayout.PAGE_AXIS));
@@ -43,78 +45,38 @@ public class Application extends JFrame {
         _btnPanel.setBorder(BorderFactory.createEmptyBorder(0,10,0,0));
 
         setActivateBtn();
-        setAddSeatBtn();
+        setSelectSeatsBtn();
 
         _activateBtn.setAlignmentX(Component.RIGHT_ALIGNMENT);
         _btnPanel.add(_activateBtn);
         _btnPanel.add(Box.createRigidArea(new Dimension(0,10)));
-        _addSeatBtn.setAlignmentX(Component.RIGHT_ALIGNMENT);
-        _btnPanel.add(_addSeatBtn);
+        _selectSeatsBtn.setAlignmentX(RIGHT_ALIGNMENT);
+        _btnPanel.add(_selectSeatsBtn);
     }
     private void setInputPanel() {
         _inputPanel = new JPanel();
         _inputPanel.setLayout(new BoxLayout(_inputPanel,BoxLayout.PAGE_AXIS));
 
         setInputField();
-        setSeatsPanel();
 
         _inputPanel.add(_inputUrl);
-        _inputPanel.add(Box.createRigidArea(new Dimension(0,10)));
-        _inputPanel.add(_seatsPanel);
+        _inputPanel.add(Box.createRigidArea(new Dimension(0,200)));
     }
     private void setInputField(){
         _inputUrl = new JTextField();
         _inputUrl.setColumns(30);
     }
-    private void setSeatsPanel(){
-        _seatsPanel = new JPanel();
-        _seatsPanel.setLayout(new BoxLayout(_seatsPanel,BoxLayout.Y_AXIS));
-
-        _seats = new ArrayList<>();
-        SeatInput firstSeat = new SeatInput(1);
-        firstSeat.addCancelButtonListener(e1 -> {
-            JOptionPane.showMessageDialog(this, "You need atleast one seat");
-        });
-        _seats.add(firstSeat);
-
-        updateSeatsInputs();
-    }
     private void setActivateBtn(){
         _activateBtn = new JButton("Activate");
         _activateBtn.addActionListener(e -> {
-            String [] seatsIds = new String [_seats.size()];
-            for (int i = 0; i < _seats.size(); i++)
-                seatsIds[i] = _seats.get(i).getSeatInput();
-            _spotSaver.Execute(_inputUrl.getText(),seatsIds);
+            _spotSaver.Execute(_inputUrl.getText(), _selectedSeatsIds);
         });
     }
-    private void setAddSeatBtn(){
-        _addSeatBtn = new JButton("Add Seat");
-        _addSeatBtn.addActionListener(e -> {
-            SeatInput seat = makeNewSeat();
-            _seats.add(seat);
-            updateSeatsInputs();
-        });
-    }
+    private void setSelectSeatsBtn() {
+        _selectSeatsBtn = new JButton("Select Seats");
 
-    private SeatInput makeNewSeat(){
-        SeatInput seat = new SeatInput(_seats.size()+1);
-        seat.addCancelButtonListener(e -> {
-            _seats.remove(seat.getSeatId()-1);
-            minimizeSeatsArray();
-            updateSeatsInputs();
+        _selectSeatsBtn.addActionListener(e -> {
+            new SelectSeatsForm(this,_inputUrl.getText());
         });
-        return seat;
-    }
-    private void updateSeatsInputs(){
-        _seatsPanel.removeAll();
-        for (SeatInput seat:_seats)
-            _seatsPanel.add(seat);
-        _seatsPanel.updateUI();
-        pack();
-    }
-    private void minimizeSeatsArray(){
-        for (int i = 0; i < _seats.size(); i++)
-            _seats.get(i).updateId(i+1);
     }
 }
