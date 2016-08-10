@@ -9,21 +9,17 @@ import org.openqa.selenium.phantomjs.PhantomJSDriverService;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 /**
  * Created by Eden on 8/8/2016.
  */
 public class SeatsUrl {
-    private final String SEAT_PATTERN = "_Seat_(\\d+)_(\\d+)";
-
     private WebDriver _webDriver;
     private JavascriptExecutor _js;
     private String _currentUrl;
     private ArrayList<Seat> _seatsArray;
 
-    public SeatsUrl() throws InterruptedException {
+    public SeatsUrl() {
         System.setProperty(PhantomJSDriverService.PHANTOMJS_EXECUTABLE_PATH_PROPERTY, "C://phantomjs.exe");
     }
 
@@ -66,26 +62,20 @@ public class SeatsUrl {
     private ArrayList<Seat> getSeatsFromSeatsElements(List<WebElement> seatsElements){
         ArrayList<Seat> result = new ArrayList<>();
 
-        Pattern p = Pattern.compile(SEAT_PATTERN);
-        Matcher matcher;
-
         for (WebElement seatElemnt : seatsElements){
             boolean status = isTaken(seatElemnt);
-            matcher = p.matcher(seatElemnt.getAttribute("id"));
-            matcher.find();
-            result.add(new Seat(Integer.parseInt(matcher.group(1)),Integer.parseInt(matcher.group(2)),status));
+
+            result.add(new Seat(seatElemnt.getAttribute("id"),status));
         }
 
         return result;
     }
-
     private boolean isTaken(WebElement seatElemnt) {
         String onclickString = seatElemnt.getAttribute("onclick");
         if (onclickString != null && onclickString.contains("Seat_OnClick"))
             return true;
         return false;
     }
-
     private String getTicketsWeb(String url) throws InterruptedException {
         _webDriver.get(url);
         Thread.sleep(2000);
