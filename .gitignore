@@ -3,3 +3,4 @@ ThatsMySpot.iml
 out/
 *.jar
 phantomjsdriver.log
+src/META-INF/MANIFEST.MF

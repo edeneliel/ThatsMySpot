@@ -1,5 +1,6 @@
 package eden.eliel;
 
+import com.google.firebase.database.FirebaseDatabase;
 import org.openqa.selenium.By;
 import org.openqa.selenium.JavascriptExecutor;
 import org.openqa.selenium.chrome.ChromeDriver;
@@ -18,9 +19,11 @@ public class SpotSaver {
 
     private ChromeDriver _webDriver;
     private JavascriptExecutor _js;
+    private FireBaseManager _database;
 
     public SpotSaver() {
         System.setProperty(CHROME_DRIVE_PACKAGE, "C://chromedriver.exe");
+        _database = new FireBaseManager();
     }
 
     public void Execute(String url, String [] seats) {
@@ -50,7 +53,7 @@ public class SpotSaver {
                     else
                         _webDriver.get(ticketUrl);
                 }
-                printTakenTime();
+                saveTime(_webDriver.findElement(By.className("General_Result_Text")).getText());
 
                 _webDriver.findElement(By.id("ctl00_CPH1_SPC_imgSubmit2")).click();
 
@@ -77,13 +80,14 @@ public class SpotSaver {
             _webDriver.findElement(By.id(seat)).click();
         }
     }
-    private void printTakenTime(){
+    private void saveTime(String movieName){
         DateFormat dateFormat = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
         Date date = new Date();
         Calendar cal = Calendar.getInstance();
         cal.setTime(date);
         cal.add(Calendar.MINUTE, SEAT_DURATION);
         String newTime = dateFormat.format(cal.getTime());
+        _database.saveNextFreeTime(movieName, newTime);
         System.out.println("Taken till - " + newTime);
     }
     private void removeSnatch(){
