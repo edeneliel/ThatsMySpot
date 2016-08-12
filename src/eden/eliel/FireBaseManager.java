@@ -16,14 +16,10 @@ public class FireBaseManager {
     private FirebaseDatabase _database;
 
     public FireBaseManager(){
-        try {
-            _options = new FirebaseOptions.Builder()
-                    .setDatabaseUrl("https://thatsmyspot-16f2c.firebaseio.com/")
-                    .setServiceAccount(new FileInputStream("ThatsMySpot-ec2e69ba63ea.json"))
-                    .build();
-        } catch (FileNotFoundException e) {
-            e.printStackTrace();
-        }
+        _options = new FirebaseOptions.Builder()
+                .setDatabaseUrl("https://thatsmyspot-16f2c.firebaseio.com/")
+                .setServiceAccount(getClass().getResourceAsStream("/ThatsMySpot-ec2e69ba63ea.json"))
+                .build();
 
         FirebaseApp.initializeApp(_options);
         _database = FirebaseDatabase.getInstance();
