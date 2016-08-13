@@ -26,8 +26,17 @@ public class FireBaseManager {
     }
 
     public void saveNextFreeTime(String movieName, String time){
-        DatabaseReference ref = _database.getReference(movieName);
-        ref.setValue(time);
+        DatabaseReference ref = _database.getReference("Movies");
+        ref.child(movieName).setValue(time);
+        try {
+            TimeUnit.SECONDS.sleep(5);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+    }
+    public void setStopFlag(boolean stopFlag) {
+        DatabaseReference ref = _database.getReference();
+        ref.child("stopFlag").setValue(stopFlag);
         try {
             TimeUnit.SECONDS.sleep(5);
         } catch (InterruptedException e) {
