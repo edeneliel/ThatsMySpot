@@ -1,6 +1,6 @@
 package eden.eliel;
 
-import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.*;
 import org.openqa.selenium.By;
 import org.openqa.selenium.JavascriptExecutor;
 import org.openqa.selenium.chrome.ChromeDriver;
@@ -20,13 +20,17 @@ public class SpotSaver {
     private ChromeDriver _webDriver;
     private JavascriptExecutor _js;
     private FireBaseManager _database;
+    private boolean _stopFlag;
 
     public SpotSaver() {
         System.setProperty(CHROME_DRIVE_PACKAGE, "C://chromedriver.exe");
         _database = new FireBaseManager();
+        setStopFlagListener();
     }
 
     public void Execute(String url, String [] seats) {
+        _stopFlag = false;
+        _database.setStopFlag(_stopFlag);
         try {
             String ticketUrl;
 
@@ -58,10 +62,13 @@ public class SpotSaver {
                 _webDriver.findElement(By.id("ctl00_CPH1_SPC_imgSubmit2")).click();
 
                 long orderTime = System.currentTimeMillis();
-                while (System.currentTimeMillis() - orderTime < SEAT_DURATION*60*1000) {
+                while (System.currentTimeMillis() - orderTime < SEAT_DURATION*60*1000 && !_stopFlag) {
+                    System.out.println(_stopFlag);
                     _webDriver.getCurrentUrl();
                     Thread.sleep(1000);
                 }
+                if (_stopFlag)
+                    _webDriver.close();
             }
         }
         catch (InterruptedException e) {
@@ -95,5 +102,21 @@ public class SpotSaver {
             _js.executeScript("document.getElementById('snatchbg').remove()");
         if (_webDriver.findElements(By.id("snatch")).size() != 0)
             _js.executeScript("document.getElementById('snatch').remove()");
+    }
+    private void setStopFlagListener(){
+        DatabaseReference ref = FirebaseDatabase.getInstance().getReference().child("stopFlag");
+
+        ValueEventListener valueListener = new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                _stopFlag = (boolean) dataSnapshot.getValue();
+            }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+
+            }
+        };
+        ref.addValueEventListener(valueListener);
     }
 }
