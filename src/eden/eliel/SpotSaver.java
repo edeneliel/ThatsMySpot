@@ -62,7 +62,6 @@ public class SpotSaver {
 
                 long orderTime = System.currentTimeMillis();
                 while (System.currentTimeMillis() - orderTime < SEAT_DURATION*60*1000 && !_stopFlag) {
-                    System.out.println(_stopFlag);
                     _webDriver.getCurrentUrl();
                     Thread.sleep(1000);
                 }
