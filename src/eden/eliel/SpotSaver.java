@@ -1,6 +1,5 @@
 package eden.eliel;
 
-import com.google.firebase.database.*;
 import org.openqa.selenium.By;
 import org.openqa.selenium.JavascriptExecutor;
 import org.openqa.selenium.chrome.ChromeDriver;
@@ -20,6 +19,7 @@ public class SpotSaver {
     private ChromeDriver _webDriver;
     private JavascriptExecutor _js;
     private FireBaseManager _database;
+    private StopFlagListener _stopFlagListener;
     private boolean _stopFlag;
 
     public SpotSaver() {
@@ -30,7 +30,6 @@ public class SpotSaver {
 
     public void Execute(String url, String [] seats) {
         _stopFlag = false;
-        _database.setStopFlag(_stopFlag);
         try {
             String ticketUrl;
 
@@ -104,19 +103,12 @@ public class SpotSaver {
             _js.executeScript("document.getElementById('snatch').remove()");
     }
     private void setStopFlagListener(){
-        DatabaseReference ref = FirebaseDatabase.getInstance().getReference().child("stopFlag");
-
-        ValueEventListener valueListener = new ValueEventListener() {
+        _stopFlagListener = new StopFlagListener() {
             @Override
-            public void onDataChange(DataSnapshot dataSnapshot) {
-                _stopFlag = (boolean) dataSnapshot.getValue();
-            }
-
-            @Override
-            public void onCancelled(DatabaseError databaseError) {
-
+            public void onRequest(String str) {
+                _stopFlag = true;
             }
         };
-        ref.addValueEventListener(valueListener);
+        _stopFlagListener.start();
     }
 }
